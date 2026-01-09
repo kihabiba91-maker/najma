@@ -1,0 +1,7 @@
+{
+  "name": "Najma Image Generator",
+  "description": "An application to generate images based on user prompts, with options for different styles and aspect ratios. Users can choose between cartoon, realistic, 3D Pixar, and drawing styles, and select A4 portrait, A4 landscape, or square dimensions.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}

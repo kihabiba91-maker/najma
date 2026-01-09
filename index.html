@@ -1,16 +1,315 @@
-
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './App';
-
-const rootElement = document.getElementById('root');
-if (!rootElement) {
-  throw new Error("Could not find root element to mount to");
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Najma Image Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/react-image-crop@11.0.5/dist/ReactCrop.css" />
+  <script type="importmap">
+{
+  "imports": {
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.29.1",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react-image-crop": "https://cdn.jsdelivr.net/npm/react-image-crop@11.0.5/+esm"
+  }
 }
+</script>
+<style>
+  body {
+    background-color: #0c0a1a;
+    background-image: radial-gradient(circle at 10% 20%, rgba(156, 100, 255, 0.15), transparent 30%),
+                      radial-gradient(circle at 80% 90%, rgba(50, 150, 255, 0.15), transparent 30%);
+  }
 
-const root = ReactDOM.createRoot(rootElement);
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+  /* Glassmorphism Effect */
+  .glass-panel {
+    background: rgba(23, 22, 43, 0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* Animated Background - Flying Stars */
+  .star {
+    position: absolute;
+    background-color: white;
+    border-radius: 50%;
+    animation-name: fly;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    opacity: 0;
+  }
+
+  @keyframes fly {
+    0% {
+      opacity: 0.3;
+      transform: translateY(0) translateX(0);
+    }
+    10% {
+      opacity: 1;
+    }
+    90% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-200px) translateX(200px);
+    }
+  }
+
+  /* Splash Screen & General Animations */
+  @keyframes fade-in {
+    to {
+      opacity: 1;
+    }
+  }
+  .animate-fade-in {
+    animation: fade-in 0.5s ease-in-out forwards;
+    opacity: 0;
+  }
+  
+  .dancing-star {
+    animation: star-dance 2s ease-in-out forwards;
+  }
+
+  @keyframes star-dance {
+    0% {
+      transform: scale(0.5) translateY(20px) rotate(-15deg);
+      opacity: 0;
+    }
+    25% {
+      transform: scale(1.1) translateY(-10px) rotate(10deg);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(0.9) translateY(5px) rotate(-10deg);
+      opacity: 1;
+    }
+    75% {
+      transform: scale(1.05) translateY(-5px) rotate(5deg);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1) translateY(0) rotate(0deg);
+      opacity: 1;
+    }
+  }
+
+  /* Loading Pulsing Star */
+  @keyframes pulse {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 0.8;
+      filter: drop-shadow(0 0 10px #a855f7);
+    }
+    50% {
+      transform: scale(1.1);
+      opacity: 1;
+      filter: drop-shadow(0 0 20px #a855f7);
+    }
+  }
+  .pulsing-star {
+    animation: pulse 2.5s infinite ease-in-out;
+  }
+
+  /* Dancing Star Animations for Main Menu */
+  @keyframes star-gentle-dance {
+    0%, 100% {
+      transform: rotate(-2deg) scale(0.98);
+      filter: drop-shadow(0 0 15px #a855f7);
+    }
+    50% {
+      transform: rotate(2deg) scale(1.02);
+      filter: drop-shadow(0 0 25px #a855f7);
+    }
+  }
+  .star-gentle-dance {
+      animation: star-gentle-dance 4s ease-in-out infinite;
+  }
+
+  @keyframes star-energetic-dance {
+    0%, 100% {
+      transform: translateY(0) rotate(-5deg) scale(1);
+    }
+    25% {
+      transform: translateY(-20px) rotate(10deg) scale(1.1);
+    }
+    50% {
+      transform: translateY(5px) rotate(-10deg) scale(0.95);
+    }
+    75% {
+      transform: translateY(-15px) rotate(8deg) scale(1.05);
+    }
+  }
+  .star-energetic-dance {
+      animation: star-energetic-dance 2.5s ease-in-out infinite;
+  }
+
+  /* Feature Transition Animation */
+  @keyframes grow-and-fade {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    70% {
+      transform: scale(25);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(25);
+      opacity: 0;
+    }
+  }
+
+  .transition-star-animate {
+    animation: grow-and-fade 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+
+  /* React-Image-Crop Customizations */
+  .ReactCrop__crop-selection {
+      border: 2px dashed rgba(255, 255, 255, 0.7);
+  }
+
+  /* --- Subtle Glow Effects --- */
+
+  /* Glow for focused text inputs and textareas */
+  textarea:focus, 
+  input[type="email"]:focus, 
+  input[type="password"]:focus,
+  input[type="text"]:focus,
+  input[type="color"]:focus {
+     box-shadow: 0 0 8px 2px rgba(99, 102, 241, 0.4);
+  }
+
+  /* Glow for main CTA buttons on hover (Generate, Login, Animate, Download) */
+  button[class*="bg-gradient-to-r"]:hover,
+  button.bg-green-600:hover {
+    box-shadow: 0 0 15px 2px rgba(192, 132, 252, 0.5);
+  }
+  
+  /* Glow for selected OptionSelector buttons */
+  button.border-indigo-500 {
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+  }
+
+  /* Glow for non-selected OptionSelector buttons on hover */
+  .grid > button:not(.border-indigo-500):hover {
+     box-shadow: 0 0 8px rgba(255, 255, 255, 0.15);
+  }
+
+  /* Glow for action buttons over images (Download, Edit, Variations) */
+  .group button.hover\:bg-indigo-600:hover {
+    box-shadow: 0 0 12px rgba(99, 102, 241, 0.6);
+  }
+  
+  /* Glow for social login buttons */
+  button.bg-slate-800\/80:hover {
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+  }
+  
+  /* Glow for header buttons */
+  header button.bg-slate-800\/50:hover {
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
+  }
+  
+  /* Object Remover Preview Animation */
+  .object-remover-preview .group:hover .remover-star {
+    transform: scale(1.1) rotate(5deg);
+  }
+  .object-remover-preview .remover-ball {
+    animation: ball-fade 5s infinite ease-in-out;
+  }
+  .object-remover-preview .remover-feather {
+    animation: feather-paint 5s infinite cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .object-remover-preview .remover-paint-stroke {
+    animation: paint-stroke-reveal 5s infinite ease-in-out;
+  }
+
+  @keyframes ball-fade {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    40% { opacity: 1; transform: scale(1.05); }
+    60% { opacity: 0; transform: scale(0.9); }
+    90% { opacity: 0; }
+  }
+
+  @keyframes feather-paint {
+    0%, 100% { transform: translate(30px, -40px) rotate(60deg); }
+    20% { transform: translate(-20px, 10px) rotate(-15deg); }
+    60% { transform: translate(40px, 20px) rotate(10deg); }
+    80% { transform: translate(60px, -30px) rotate(45deg); }
+  }
+
+  @keyframes paint-stroke-reveal {
+    0%, 25%, 100% { opacity: 0; transform: scaleX(0); }
+    40% { opacity: 0.8; transform: scaleX(1); }
+    60% { opacity: 0; transform: scaleX(1); }
+  }
+
+  /* Image Enhancer Preview Animation */
+  .enhancer-preview .sharp-star-container {
+    position: absolute;
+    inset: 0;
+    clip-path: inset(0 100% 0 0);
+    animation: wipe-reveal 5s infinite ease-in-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .enhancer-preview .wipe-line {
+    position: absolute;
+    top: -10%;
+    left: 0;
+    width: 4px;
+    height: 120%;
+    background: linear-gradient(to bottom, transparent, white, transparent);
+    box-shadow: 0 0 10px white;
+    transform: translateX(-100%) skewX(-10deg);
+    animation: wipe-sweep 5s infinite ease-in-out;
+  }
+  
+  @keyframes wipe-reveal {
+    0%, 20%, 80%, 100% { clip-path: inset(0 100% 0 0); }
+    50% { clip-path: inset(0 0 0 0); }
+  }
+
+  @keyframes wipe-sweep {
+    0%, 20% { transform: translateX(-20px) skewX(-10deg); }
+    50% { transform: translateX(180px) skewX(-10deg); }
+    80%, 100% { transform: translateX(-20px) skewX(-10deg); }
+  }
+
+  /* Text to Speech Preview Animation */
+  .tts-preview .sound-wave {
+    position: absolute;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    animation: sound-wave-pulse 4s infinite cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  @keyframes sound-wave-pulse {
+    0% {
+      transform: scale(0.5);
+      opacity: 0;
+    }
+    50% {
+      opacity: 0.7;
+    }
+    100% {
+      transform: scale(2.5);
+      opacity: 0;
+    }
+  }
+</style>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body class="bg-slate-900">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
